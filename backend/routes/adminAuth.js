@@ -18,7 +18,13 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ message: "Invalid credentials." });
     }
     req.session.isAdmin = true;
-    return res.status(200).json({ message: "Login successful." });
+    req.session.save((err) => {
+      if (err) {
+        console.error("Session save error:", err);
+        return res.status(500).json({ message: "Session error." });
+      }
+      return res.status(200).json({ message: "Login successful." });
+    });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: "Server error." });
