@@ -2,11 +2,19 @@ import { useState, useEffect } from "react";
 
 const BASE = import.meta.env.VITE_API_URL;
 
+function getSessionId() {
+  return localStorage.getItem("admin_session_id") || "";
+}
+
 function req(path, method = "GET", body) {
+  const headers = {};
+  if (body) headers["Content-Type"] = "application/json";
+  const sid = getSessionId();
+  if (sid) headers["x-session-id"] = sid;
   return fetch(BASE + path, {
     method,
     credentials: "include",
-    headers: body ? { "Content-Type": "application/json" } : {},
+    headers,
     body: body ? JSON.stringify(body) : undefined,
   }).then((r) => r.json());
 }
@@ -200,8 +208,11 @@ function Login({ onLogin }) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password: pass }),
     });
-    if (res.ok) onLogin();
-    else setErr("Wrong email or password");
+    if (res.ok) {
+      const data = await res.json();
+      if (data.sessionId) localStorage.setItem("admin_session_id", data.sessionId);
+      onLogin();
+    } else setErr("Wrong email or password");
   };
 
   return (
@@ -278,6 +289,7 @@ export default function AdminPanel() {
 
   const logout = async () => {
     await req("/auth/logout", "POST");
+    localStorage.removeItem("admin_session_id");
     setLoggedIn(false);
   };
 

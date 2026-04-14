@@ -8,9 +8,7 @@ router.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    return res
-      .status(400)
-      .json({ message: "Email and password are required." });
+    return res.status(400).json({ message: "Email and password are required." });
   }
   try {
     const admin = await Admin.findOne({ email: email.toLowerCase() });
@@ -23,7 +21,8 @@ router.post("/login", async (req, res) => {
         console.error("Session save error:", err);
         return res.status(500).json({ message: "Session error." });
       }
-      return res.status(200).json({ message: "Login successful." });
+      // Return session ID so frontend can store and send it as a header
+      return res.status(200).json({ message: "Login successful.", sessionId: req.session.id });
     });
   } catch (err) {
     console.error(err);
@@ -31,18 +30,16 @@ router.post("/login", async (req, res) => {
   }
 });
 
-//logout
+// logout
 router.post("/logout", (req, res) => {
   req.session.destroy((err) => {
-    if (err) {
-      return res.status(500).json({ message: "Could not log out." });
-    }
+    if (err) return res.status(500).json({ message: "Could not log out." });
     res.clearCookie("connect.sid");
     return res.status(200).json({ message: "Logged out successfully." });
   });
 });
 
-//frontend check if session is alive
+// check if session is alive
 router.get("/me", (req, res) => {
   if (req.session && req.session.isAdmin) {
     return res.status(200).json({ loggedIn: true });

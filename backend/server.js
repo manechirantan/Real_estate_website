@@ -28,6 +28,7 @@ app.use(
       }
     },
     credentials: true,
+    allowedHeaders: ["Content-Type", "x-session-id"],
   })
 );
 
@@ -40,7 +41,7 @@ app.use(
     saveUninitialized: false,
     store: MongoStore.create({
       mongoUrl: process.env.MONGO_URI,
-      ttl: 60 * 60 * 8, // 8 hours, matches cookie maxAge
+      ttl: 60 * 60 * 8,
       autoRemove: "native",
     }),
     cookie: {
