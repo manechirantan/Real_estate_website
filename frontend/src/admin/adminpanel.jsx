@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-const BASE = "https://real-estate-website-5qcl.onrender.com";
+const BASE = import.meta.env.VITE_API_URL;
 
 function req(path, method = "GET", body) {
   return fetch(BASE + path, {
