@@ -1,5 +1,6 @@
 import express from "express";
 import session from "express-session";
+import MongoStore from "connect-mongo";
 import cors from "cors";
 import connectdb from "./config/database.js";
 import authRoutes from "./routes/adminAuth.js";
@@ -37,6 +38,11 @@ app.use(
     secret: process.env.SESSION_SECRET || "megaplex_secret_key",
     resave: false,
     saveUninitialized: false,
+    store: MongoStore.create({
+      mongoUrl: process.env.MONGO_URI,
+      ttl: 60 * 60 * 8, // 8 hours, matches cookie maxAge
+      autoRemove: "native",
+    }),
     cookie: {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
